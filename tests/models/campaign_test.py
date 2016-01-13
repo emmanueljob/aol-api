@@ -12,15 +12,22 @@ class CampaignTest(Base):
         campaign = Campaign(CampaignTest.conn)
         campaign['advertiser_id'] = 25270
         campaign['organization_id'] = 11357
-        campaign['name'] = "campaign test"
+        campaign['name'] = "arun's campaign test"
         campaign['startDate'] = "2014-10-17T00:00:00Z"
         campaign['endDate'] = "2015-10-17T00:00:00Z"
         campaign['status'] = "LIVE"
-        # campaign.create()
-        
+        assert campaign.create() != None
+
+    def testGetByCampaignId(self):
+        campaign = Campaign(CampaignTest.conn)
+        assert campaign.get_campaign_by_id('11357', '25270', '77527') == {u'status': u'LIVE', u'startDate': u'2014-10-17T00:00:00Z', u'endDate': u'2015-10-17T00:00:00Z', u'name': u"arun's campaign test", u'campaignId': 77527, u'organizationId': 11357, u'organizationSapId': 7000077134, u'currencyCode': None, u'advertiserId': 25270, u'customFieldValues': [], u'goals': [], u'advertiserSapId': 0}
+
     def testGetByAdvertiser(self):
-        
         loader = Campaign(CampaignTest.conn)
-        campaigns = loader.get_by_advertiser(25270, 11357)
-        for test_campaign in campaigns:
-            print test_campaign.get('campaignId')
+        campaigns = loader.get_list_by_advertiser(25270, 11357)
+        assert len(campaigns) >= 1
+
+    def test_get_id(self):
+        campaign = Campaign(CampaignTest.conn)
+        campaignId = campaign.get_campaign_by_id('11357', '25270', '77061')['campaignId']
+        assert campaignId == 77527
