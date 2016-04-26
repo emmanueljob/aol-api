@@ -1,7 +1,7 @@
 import requests
 import json
 import urllib
-
+from urllib import urlencode
 
 class Connection:
 
@@ -12,10 +12,6 @@ class Connection:
         Connection.username = username
         Connection.url = url
 
-    def connect(self):
-        headers = []
-        headers.push(Connection.get_authorization())
-
     def get_authorization(self):
         if Connection.authorization_token is None:
             Connection.authorization_token = self.authorize()
@@ -23,18 +19,24 @@ class Connection:
         return {'Authorization': Connection.authorization_token}
 
     def authorize(self):
-        auth_url = "https://elsuat-sso.corp.aol.com/opensso/UI/Login"
+        # auth_url = "https://elsuat-sso.corp.aol.com/opensso/UI/Login"
+        auth_url = "https://elsuat-ext.corp.aol.com:443/opensso/identity/authenticate?uri=realm=aolext"
+
+        username = Connection.username
+        password = Connection.password
+
         credentials = {
-            "IDToken1": Connection.username,
-            "IDToken2": Connection.password
+            "username": username,
+            "password": password
         }
 
         credentials['SunQueryParamsString'] = 'cmVhbG09YW9sZXh0'
 
-        headers = {'Content-Type': 'application/json'}
-        response = requests.post(auth_url, headers=headers, params=credentials, allow_redirects=False, verify=False)
+        headers = {'Referer': 'https://dsp.accuenmedia.com'}
 
-        if response is not None and response.headers.get('x-AuthErrorCode', -1) == '0':
+        response = requests.post(auth_url, headers=headers, data=credentials, allow_redirects=True, verify=False)
+
+        if response is not None:
             Connection.authorization_token = "ELS {0}".format(response.cookies['iPlanetDirectoryProuat'])
         else:
             raise Exception('unable to authenticate')
