@@ -2,7 +2,6 @@ import json
 import requests
 import time
 
-
 class Base(dict):
 
     connection = None
@@ -18,6 +17,7 @@ class Base(dict):
         return "{0}/{1}".format(Base.connection.url, self.obj_name)
 
     def get_create_url(self):
+        print 'URL: ', self.get_url()
         return self.get_url()
 
     def get_find_url(self, id):
@@ -43,7 +43,8 @@ class Base(dict):
         if id in self:
             del self['id']
 
-        print "CREATING"
+        print "CREATING!!!!!"
+
         response = self._execute("POST", self.get_create_url(), json.dumps(self.export_props()))
         obj = self._get_response_object(response)
         self.import_props(obj)
@@ -53,11 +54,15 @@ class Base(dict):
     def getId(self):
         return self.get('id')
 
+    def getName(self):
+        return self.get('name')
+
     def save(self):
         if self.getId() is None or self.getId() == 0:
             raise Exception("cant update an object with no id")
 
         response = self._execute("PUT", self.get_url(), json.dumps(self.export_props()))
+
         obj = self._get_response_object(response)
         self.import_props(obj)
 
@@ -67,17 +72,20 @@ class Base(dict):
         return self._execute_no_reauth(method, url, payload)
 
     def _execute_no_reauth(self, method, url, payload):
+
         headers = Base.connection.get_authorization()
 
         headers['Content-Type'] = 'application/json'
 
-        
+        print 'HEADERS AUTH: ', headers['Authorization']
+
         if method == "GET":
             print "curl -H 'Content-Type: application/json' -H 'Authorization: {0}' -d '{1}' '{2}'".format(headers['Authorization'], payload, url)
             start = time.time()
             rval = requests.get(url, headers=headers, data=payload, verify=False)
             total_time = time.time() - start
             print "TIME: " + str(total_time)
+            print 'RVAL: ', rval
             return rval
         elif method == "POST":
             print "curl -XPOST -H 'Content-Type: application/json' -H 'Authorization: {0}' -d '{1}' '{2}'".format(headers['Authorization'], payload, url)
@@ -85,6 +93,7 @@ class Base(dict):
             rval = requests.post(url, headers=headers, data=payload, verify=False)
             total_time = time.time() - start
             print "TIME: " + str(total_time)
+            print rval.text
             return rval
         elif method == "PUT":
             print "curl -XPUT -H 'Content-Type: application/json' -H 'Authorization: {0}' -d '{1}' '{2}'".format(headers['Authorization'], payload, url)
@@ -118,20 +127,22 @@ class Base(dict):
             new_obj = self.__class__(Base.connection)
             new_obj.import_props(obj)
             rval.append(new_obj)
-            
+
         return rval
 
     def _get_response_object(self, response):
         obj = json.loads(response.text)
+
         new_obj = None
         if obj and response.status_code in [200,201]:
             new_obj = self.__class__(Base.connection)
             new_obj.import_props(obj)
         else:
-            print response.text
+            print 'RESPONSE TEXT: ', response.text
             raise Exception("Bad response code: {0}  DATA: {1}".format(response.status_code, response.text))
 
         return new_obj
+
 
     def import_props(self, props):
         for key, value in props.iteritems():
@@ -140,9 +151,11 @@ class Base(dict):
     def export_props(self):
         rval = {}
         # do this an obvious way because using __dict__ gives us params we dont need.
+
         for key, value in self.iteritems():
-            if key in ['advertiser_id', 'organization_id']:
+            if key in ["advertiser_id", "organization_id"]:
                 continue
             rval[key] = value
 
+        print 'RVAL!!!!: ', json.dumps(rval)
         return rval
