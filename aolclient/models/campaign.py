@@ -9,6 +9,9 @@ class Campaign(Base):
     def getId(self):
         return self.get('campaignId')
 
+    def getName(self):
+        return self.get('name')
+
     def get_create_url(self):
         return '{0}/video-management/v1/organizations/{1}/advertisers/{2}/campaigns'.format(Base.connection.url, self.get('organization_id'), self.get('advertiser_id'))
 
