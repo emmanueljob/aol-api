@@ -27,4 +27,4 @@ class Tactic(Base):
         method = "GET"
 
         response = self._execute(method, url, '')
-        return self._get_response_objects(response)
+        return self._get_response_object(response)
