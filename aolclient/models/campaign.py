@@ -6,6 +6,8 @@ from aolclient.service.connection import Connection
 
 class Campaign(Base):
 
+    obj_name = 'campaigns'
+
     def getId(self):
         return self.get('campaignId')
 

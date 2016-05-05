@@ -32,8 +32,9 @@ class Base(dict):
                 rval = self._get_response_objects(response)
             return rval
         else:
+            print 'URL: ', self.get_find_url(id)
             response = self._execute("GET", self.get_find_url(id), None)
-
+            print 'RESPONSE: ', response.text
             if response:
                 return self._get_response_object(response)
             else:
@@ -85,7 +86,7 @@ class Base(dict):
             rval = requests.get(url, headers=headers, data=payload, verify=False)
             total_time = time.time() - start
             print "TIME: " + str(total_time)
-            print 'RVAL: ', rval
+            print 'RVAL!!!: ', rval.text
             return rval
         elif method == "POST":
             print "curl -XPOST -H 'Content-Type: application/json' -H 'Authorization: {0}' -d '{1}' '{2}'".format(headers['Authorization'], payload, url)
@@ -115,6 +116,7 @@ class Base(dict):
         rval = []
         if response.status_code == 200:
             json_response = json.loads(response.text)
+            print 'JSON RESPONSE: ', json_response
         else:
             print response.text
             raise Exception("Bad response code {0}".format(response.text))
@@ -123,8 +125,14 @@ class Base(dict):
         if 'list' in json_response:
             obj_list = json_response['list']
 
+        else:
+            obj_list = json_response
+            rval.append(obj_list)
+            return rval
+
         for obj in obj_list:
             new_obj = self.__class__(Base.connection)
+            print 'NEW OBJ: ', new_obj
             new_obj.import_props(obj)
             rval.append(new_obj)
 
@@ -142,7 +150,6 @@ class Base(dict):
             raise Exception("Bad response code: {0}  DATA: {1}".format(response.status_code, response.text))
 
         return new_obj
-
 
     def import_props(self, props):
         for key, value in props.iteritems():
