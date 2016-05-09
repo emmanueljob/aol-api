@@ -7,7 +7,7 @@ class Tactic(Base):
     obj_name = "tactics"
 
     def getId(self):
-        return self.get('tacticId')
+        return self.get('id')
 
     def get_list_of_tactics(self, organization_id):
         url = '{0}/video-management/v1/organizations/{1}/advertisers/campaigns/tactics'.format(Base.connection.url, organization_id)
