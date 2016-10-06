@@ -12,5 +12,12 @@ class AdvertiserTest(Base):
         organization_id = '11357'
         advs = adv.find_by_organization(organization_id)
         for result in advs:
-            print result
+            assert result.getId() > 0
+            assert result.getName() is not None
 
+    def testGetById(self):
+        loader = Advertiser(AdvertiserTest.conn)
+        organization_id = 11357
+        advertiser_id = 25270
+        adv = loader.find_by_id(organization_id, advertiser_id)
+        assert adv.getId() == advertiser_id

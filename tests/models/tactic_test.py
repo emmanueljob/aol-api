@@ -1,15 +1,65 @@
-import unittest
 import json
+import unittest
 
-from aolclient.models.campaign import Campaign
 from aolclient.models.tactic import Tactic
 from tests.base import Base
 
 
 class TacticTest(Base):
-
-    # get tactics based on org_id
-    def test_get_list_of_tactics(self):
+        
+    def test_get_by_campaign(self):
+        campaign_id = 77061
+        advertiser_id = 25270
+        organization_id = 11357
+        
         loader = Tactic(TacticTest.conn)
-        tactics = loader.get_list_of_tactics(11357)
-        assert tactics == [{u'status': 1, u'campaignId': 76424, u'targetingExpression': u'([eXelate Segment] IN ("233") OR [eXelate Segment] IN ("234")) AND [Geography] IN ("United States")', u'orgSapId': 7000077134, u'cost': 15.0, u'cacheBreakers': u'', u'deliveryCatchUpSpeed': u'CATCH_UP_QUICKLY', u'id': 569541, u'pricingType': u'0', u'deliveryAlgorithmType': 1, u'servingStartDate': u'2015-10-01T07:00:00Z', u'priority': 1, u'aodBuyerMargin': 6.0, u'aodPassthroughCost': 0.0, u'placementTargetingExpression': u'[Placement Viewability] IN ("2","1","6")', u'servingEndDate': u'2016-01-01T07:59:59Z', u'description': u'', u'specifications': None, u'price': 0.0, u'frequencyCappingResetPeriod': 0, u'trackingOnly': 0, u'frequencyCappingAmount': -2, u'name': u'Melody', u'organizationId': 11357, u'advSapId': None, u'pricingInformationType': 1, u'adType': u'ATM', u'alwaysDeliver': 0}, {u'status': 1, u'campaignId': 77061, u'targetingExpression': u'([AOL Audience Behaviors Segment] IN ("82105") OR [BlueKai - Datalogix - TARGUSinfo] IN ("40343") OR [Lotame Audience ID] IN ("91440") OR [eXelate Segment] IN ("73815") OR [eXelate Segment] IN ("73527")) AND [View Hour] IN ("5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20") AND [Geography] IN ("United States") AND [Devices] IN ("ONLINE_VIDEO")', u'orgSapId': 7000077134, u'cost': 18.0, u'cacheBreakers': u'', u'deliveryCatchUpSpeed': u'CATCH_UP_QUICKLY', u'id': 576762, u'pricingType': u'0', u'deliveryAlgorithmType': 1, u'servingStartDate': u'2015-08-31T07:00:00Z', u'priority': 1, u'aodBuyerMargin': 6.0, u'aodPassthroughCost': 0.0, u'placementTargetingExpression': u'[Placement Viewability] IN ("2","6")', u'servingEndDate': u'2015-10-11T06:59:00Z', u'description': u'$18 Gross', u'specifications': None, u'price': 0.0, u'frequencyCappingResetPeriod': 0, u'trackingOnly': 0, u'frequencyCappingAmount': -2, u'name': u'Small Business Decision Makers_OPEN', u'organizationId': 11357, u'advSapId': None, u'pricingInformationType': 1, u'adType': u'ATM', u'alwaysDeliver': 0}, {u'status': 1, u'campaignId': 77061, u'targetingExpression': u'([eXelate Segment] IN ("262") OR [eXelate Segment] IN ("47589") OR [eXelate Segment] IN ("73702") OR [eXelate Segment] IN ("73990") OR [eXelate Segment] IN ("95168") OR [eXelate Segment] IN ("95169") OR [eXelate Segment] IN ("95170") OR [eXelate Segment] IN ("96060") OR [Lotame Audience ID] IN ("91472") OR [AOL Audience Behaviors Segment] IN ("46200") OR [AOL Audience Behaviors Segment] IN ("46078") OR [Eyeota segment] IN ("128621")) AND [View Hour] IN ("5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20") AND [Geography] IN ("United States") AND [Devices] IN ("ONLINE_VIDEO")', u'orgSapId': 7000077134, u'cost': 18.0, u'cacheBreakers': u'', u'deliveryCatchUpSpeed': u'CATCH_UP_QUICKLY', u'id': 576779, u'pricingType': u'0', u'deliveryAlgorithmType': 1, u'servingStartDate': u'2015-08-31T07:00:00Z', u'priority': 1, u'aodBuyerMargin': 6.0, u'aodPassthroughCost': 0.0, u'placementTargetingExpression': u'[Placement Viewability] IN ("2","6")', u'servingEndDate': u'2015-10-11T06:59:00Z', u'description': u'$18 Gross', u'specifications': None, u'price': 0.0, u'frequencyCappingResetPeriod': 0, u'trackingOnly': 0, u'frequencyCappingAmount': -2, u'name': u'Real Estate Industry', u'organizationId': 11357, u'advSapId': None, u'pricingInformationType': 1, u'adType': u'ATM', u'alwaysDeliver': 0}]
+        tactics = loader.get_by_campaign(organization_id, advertiser_id, campaign_id)
+        assert len(tactics) > 0
+
+    def test_get_by_id(self):
+        advertiser_id = 25270
+        organization_id = 11357
+        campaign_id = 77061
+        tactic_id = 694407
+
+        loader = Tactic(TacticTest.conn)
+        tactic = loader.get_by_id(organization_id, advertiser_id, campaign_id, tactic_id)
+        print tactic
+        assert tactic.getId() == 694407
+        assert tactic.getCampaignId() > 0
+        # assert tactic.getBudget() > 0
+        assert tactic.getStatus() > 0
+        assert tactic.getStartDate() > 0
+        assert tactic.getEndDate() > 0
+        assert tactic.getFrequencyCap() > 0
+        assert tactic.getFrequencyCapInterval() > 0
+        assert tactic.getPrice() > 0
+
+    def test_get_creatives(self):
+        advertiser_id = 25270
+        organization_id = 11357
+        campaign_id = 77061
+        tactic_id = 694407
+
+        loader = Tactic(TacticTest.conn)
+        tactic = loader.get_by_id(organization_id, advertiser_id, campaign_id, tactic_id)
+        assert tactic.getId() == 694407
+        creatives = tactic.get_creatives(organization_id, advertiser_id)
+        assert len(creatives) == 1
+
+    def test_get_deals(self):
+        advertiser_id = 25270
+        organization_id = 11357
+        campaign_id = 77061
+        tactic_id = 694407
+        deal_ids = [710850]
+
+        loader = Tactic(TacticTest.conn)
+        tactic = loader.get_by_id(organization_id, advertiser_id, campaign_id, tactic_id)
+        assert tactic.getId() == 694407
+        assert tactic.set_inventory_sources(deal_ids, organization_id, advertiser_id)
+        tactic = loader.get_by_id(organization_id, advertiser_id, campaign_id, tactic_id)
+        print json.dumps(tactic, indent=4)
+        assert len(tactic.get_inventory_sources()) == 1
+
+        

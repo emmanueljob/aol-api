@@ -32,9 +32,7 @@ class Base(dict):
                 rval = self._get_response_objects(response)
             return rval
         else:
-            print 'URL: ', self.get_find_url(id)
             response = self._execute("GET", self.get_find_url(id), None)
-            print 'RESPONSE: ', response.text
             if response:
                 return self._get_response_object(response)
             else:
@@ -43,8 +41,6 @@ class Base(dict):
     def create(self):
         if id in self:
             del self['id']
-
-        print "CREATING!!!!!"
 
         response = self._execute("POST", self.get_create_url(), json.dumps(self.export_props()))
         obj = self._get_response_object(response)
@@ -78,36 +74,28 @@ class Base(dict):
 
         headers['Content-Type'] = 'application/json'
 
-        print 'HEADERS AUTH: ', headers['Authorization']
-
         if method == "GET":
             print "curl -H 'Content-Type: application/json' -H 'Authorization: {0}' -d '{1}' '{2}'".format(headers['Authorization'], payload, url)
             start = time.time()
             rval = requests.get(url, headers=headers, data=payload, verify=False)
             total_time = time.time() - start
-            print "TIME: " + str(total_time)
-            print 'RVAL!!!: ', rval.text
             return rval
         elif method == "POST":
             print "curl -XPOST -H 'Content-Type: application/json' -H 'Authorization: {0}' -d '{1}' '{2}'".format(headers['Authorization'], payload, url)
             start = time.time()
             rval = requests.post(url, headers=headers, data=payload, verify=False)
             total_time = time.time() - start
-            print "TIME: " + str(total_time)
-            print rval.text
             return rval
         elif method == "PUT":
             print "curl -XPUT -H 'Content-Type: application/json' -H 'Authorization: {0}' -d '{1}' '{2}'".format(headers['Authorization'], payload, url)
             start = time.time()
             rval = requests.put(url, headers=headers, data=payload, verify=False)
             total_time = time.time() - start
-            print "TIME: " + str(total_time)
             return rval
         elif method == "DELETE":
             start = time.time()
             rval = requests.delete(url, headers=headers)
             total_time = time.time() - start
-            print "TIME: " + str(total_time)
             return rval
         else:
             raise Exception("Unknown method")
@@ -116,23 +104,19 @@ class Base(dict):
         rval = []
         if response.status_code == 200:
             json_response = json.loads(response.text)
-            print 'JSON RESPONSE: ', json_response
         else:
-            print response.text
             raise Exception("Bad response code {0}".format(response.text))
 
         obj_list = []
         if 'list' in json_response:
             obj_list = json_response['list']
-
+        elif 'data' in json_response:
+            obj_list = json_response['data']
         else:
             obj_list = json_response
-            rval.append(obj_list)
-            return rval
 
         for obj in obj_list:
             new_obj = self.__class__(Base.connection)
-            print 'NEW OBJ: ', new_obj
             new_obj.import_props(obj)
             rval.append(new_obj)
 
@@ -146,7 +130,6 @@ class Base(dict):
             new_obj = self.__class__(Base.connection)
             new_obj.import_props(obj)
         else:
-            print 'RESPONSE TEXT: ', response.text
             raise Exception("Bad response code: {0}  DATA: {1}".format(response.status_code, response.text))
 
         return new_obj
@@ -164,5 +147,4 @@ class Base(dict):
                 continue
             rval[key] = value
 
-        print 'RVAL!!!!: ', json.dumps(rval)
         return rval

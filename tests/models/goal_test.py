@@ -24,7 +24,7 @@ class GoalTest(Base):
     def testGetByCampaign(self):
         
         loader = Campaign(GoalTest.conn)
-        campaigns = loader.get_by_advertiser(25270, 11357)
+        campaigns = loader.get_list_by_advertiser(25270, 11357)
         for test_campaign in campaigns:
             loader = Goal(GoalTest.conn)
             goals = loader.get_by_campaign(test_campaign.get('campaignId'), 25270, 11357)

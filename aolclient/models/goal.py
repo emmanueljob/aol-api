@@ -14,6 +14,3 @@ class Goal(Base):
         
         response = self._execute(method, url, '')
         return self._get_response_objects(response)
-        
-
-    
