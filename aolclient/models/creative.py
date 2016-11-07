@@ -9,6 +9,18 @@ class Creative(Base):
 
     obj_name = "creatives"
 
+    def get_by_id(self, creative_id, organization_id, advertiser_id):
+        url = '{0}/video-management/v2/organizations/{1}/advertisers/{2}/creatives/{3}'.format(Base.connection.url, organization_id, advertiser_id, creative_id)
+        method = 'GET'
+        response = self._execute(method, url, '')
+        json_response = json.loads(response.text)
+        data = json_response['thirdPartyVideoCreative']
+        new_obj = self.__class__(Base.connection)
+        new_obj.import_props(data)
+
+        return new_obj
+        
+
     def get_create_url(self):
         return '{0}/video-management/v4/organizations/{1}/creatives'.format(Base.connection.url, self.get('organization_id'))
 
