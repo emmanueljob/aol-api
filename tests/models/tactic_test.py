@@ -35,6 +35,30 @@ class TacticTest(Base):
         assert tactic.getFrequencyCapInterval() > 0
         assert tactic.getPrice() > 0
 
+
+    def test_set_fields(self):
+        advertiser_id = 25270
+        organization_id = 11357
+        campaign_id = 77061
+        tactic_id = 694407
+
+        loader = Tactic(TacticTest.conn)
+        tactic = loader.get_by_id(organization_id, advertiser_id, campaign_id, tactic_id)
+        old_name = tactic.getName() 
+        tactic.setName("eman")
+
+        old_budget = tactic.getBudget() 
+        # tactic.setBudget(1001)
+        tactic.save(organization_id, advertiser_id)
+        tactic = loader.get_by_id(organization_id, advertiser_id, campaign_id, tactic_id)
+        
+        assert tactic.getName() == "eman"
+        # assert tactic.getBudget() == 1001
+
+        # tactic.setBudget(old_budget)
+        tactic.setName(old_name)
+        tactic.save(organization_id, advertiser_id)
+
     def test_get_creatives(self):
         advertiser_id = 25270
         organization_id = 11357

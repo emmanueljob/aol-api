@@ -5,7 +5,13 @@ from aolclient.models.base import Base
 class Tactic(Base):
 
     obj_name = "tactics"
-    
+
+    def getName(self):
+        return self.get('name')
+
+    def setName(self, name):
+        self['name'] = name
+
     def getCampaignId(self):
         return self.get('campaignId', 0)
     
@@ -16,6 +22,21 @@ class Tactic(Base):
                 if goal['deliveryCappingType'] == 'GROSS_REVENUE' and goal['deliveryCappingResetPeriod'] == "TOTAL":
                     return goal.get('goal')
         return None
+    
+    def setBudget(self, budget):
+        # find the goal that is the total goal.
+        if 'goals' not in self:
+            self['goals'] = []
+        added = False
+        max_order = 0
+        for goal in self.get('goals'):
+            max_order = max(goal['ordering'], max_order)
+            if goal['deliveryCappingType'] == 'GROSS_REVENUE' and goal['deliveryCappingResetPeriod'] == "TOTAL":
+                added = True
+                goal['goal'] = budget
+
+        if not added:
+            self['goals'].append({'deliveryCappingType': 'GROSS_REVENUE', 'deliveryCappingResetPeriod': "TOTAL", 'goal': budget, 'pacingType': 'LIMIT', 'ordering': max_order + 1})
 
     def getActive(self):
         pass
@@ -69,6 +90,19 @@ class Tactic(Base):
         url = '{0}/video-management/v3/organizations/{1}/advertisers/{2}/campaigns/{3}/tactics/{4}'.format(Base.connection.url, organization_id, advertiser_id, self.getCampaignId(), self.getId())
         method = "PUT"
 
+        flights = self.get('flights')
+        for flight in flights:
+            del flight['id']
+
+        goals = self.get('goals')
+        for goal in goals:
+            del goal['id']
+
+        specification = self.get('specification')
+        del specification['optimizationEnabled']
+        del specification['nonLinearOverLay']
+        del specification['notNonLinearOverLay']
+
         payload = {
             "name": self.get('name'),
             "description": self.get('description'),
@@ -81,25 +115,74 @@ class Tactic(Base):
             "deliveryCatchUpSpeed": self.get('deliveryCatchUpSpeed'),
             "status": self.get('status'),
             "adType": self.get('adType'),
-            "priority": self.get('priority'),
+            "priority": 1, #self.get('priority'),
             "alwaysDeliver": self.get('alwaysDeliver'),
             "aodBuyerMargin": self.get('aodBuyerMargin'),
             "aodPassthroughCost": self.get('aodPassthroughCost'),
             "pricingInformationType": self.get('pricingInformationType'),
             "cacheBreakers": self.get('cacheBreakers'),
             "specification": self.get('specification'),
-            "flights": self.get('flights'),
+            "flights": flights,
             "targeting": self.get('targeting'),
             "bid": self.get('bid'),
             "inventory": [
                 {
                     "type": "DIRECTINVENTORY",
-                    "priority": 0,
+                    "priority": 1,
                     "items": inv_source_ids
                     }
                 ],
             "medialist": self.get('medialist'),
-            "goals": self.get('goals')
+            "goals": goals
+            }
+
+        response = self._execute(method, url, json.dumps(payload))
+        print response.text
+        return True
+
+    def save(self, organization_id, advertiser_id):
+        url = '{0}/video-management/v3/organizations/{1}/advertisers/{2}/campaigns/{3}/tactics/{4}'.format(Base.connection.url, organization_id, advertiser_id, self.getCampaignId(), self.getId())
+        method = "PUT"
+
+        flights = self.get('flights')
+        for flight in flights:
+            del flight['id']
+
+        goals = self.get('goals')
+        for goal in goals:
+            if 'id' in goal:
+                del goal['id']
+
+        specification = self.get('specification')
+        del specification['optimizationEnabled']
+        del specification['nonLinearOverLay']
+        del specification['notNonLinearOverLay']
+
+        payload = {
+            "name": self.get('name'),
+            "description": self.get('description'),
+            "frequencyCappingAmount": self.get('frequencyCappingAmount'),
+            "frequencyCappingResetPeriod": self.get('frequencyCappingResetPeriod'),
+            "cost": self.get('cost'),
+            "price": self.get('price'),
+            "pricingType": self.get('pricingType'),
+            "deliveryAlgorithmType": self.get('deliveryAlgorithmType'),
+            "deliveryCatchUpSpeed": self.get('deliveryCatchUpSpeed'),
+            "status": self.get('status'),
+            "adType": self.get('adType'),
+            "priority": 1, #self.get('priority'),
+            "alwaysDeliver": self.get('alwaysDeliver'),
+            "aodBuyerMargin": self.get('aodBuyerMargin'),
+            "aodPassthroughCost": self.get('aodPassthroughCost'),
+            "pricingInformationType": self.get('pricingInformationType'),
+            "cacheBreakers": self.get('cacheBreakers'),
+            "specification": self.get('specification'),
+            "flights": flights,
+            "targeting": self.get('targeting'),
+            "bid": self.get('bid'),
+            "inventory": self.get('inventory'),
+            "medialist": self.get('medialist'),
+            "goals": goals
             }
 
         response = self._execute(method, url, json.dumps(payload))
